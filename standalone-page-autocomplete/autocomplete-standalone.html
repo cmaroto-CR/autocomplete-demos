@@ -3,92 +3,355 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#003b7a">
+<title>Aviation Parts Search</title>
 <style>
-* {
-  box-sizing: border-box;
-}
+  :root {
+    color-scheme: light;
+    --navy: #082b50;
+    --blue: #064b9b;
+    --bright-blue: #00a3e0;
+    --ink: #172b3d;
+    --muted: #596b7b;
+    --line: #d7e0e8;
+    --surface: #ffffff;
+    --page: #f2f5f8;
+  }
 
-body {
-  font: 16px Arial;  
-}
+  * { box-sizing: border-box; }
 
-/*the container must be positioned relative:*/
-.autocomplete {
-  position: relative;
-  display: inline-block;
-}
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font: 16px/1.5 Arial, Helvetica, sans-serif;
+  }
 
-input {
-  border: 1px solid transparent;
-  background-color: #f1f1f1;
-  padding: 10px;
-  font-size: 16px;
-}
+  .utility-bar {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 28px;
+    padding: 0 max(5vw, 24px);
+    background: #061d36;
+    color: #eaf3fb;
+    font-size: 13px;
+  }
 
-input[type=text] {
-  background-color: #f1f1f1;
-  width: 100%;
-}
+  .utility-bar a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-input[type=submit] {
-  background-color: DodgerBlue;
-  color: #fff;
-  cursor: pointer;
-}
+  .brand-header {
+    background: var(--blue);
+    color: white;
+  }
 
-.autocomplete-items {
-  position: absolute;
-  border: 1px solid #d4d4d4;
-  border-bottom: none;
-  border-top: none;
-  z-index: 99;
-  /*position the autocomplete items to be the same width as the container:*/
-  top: 100%;
-  left: 0;
-  right: 0;
-}
+  .brand-row {
+    min-height: 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
 
-.autocomplete-items div {
-  padding: 10px;
-  cursor: pointer;
-  background-color: #fff; 
-  border-bottom: 1px solid #d4d4d4; 
-}
+  .brand {
+    color: white;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-decoration: none;
+  }
 
-/*when hovering an item:*/
-.autocomplete-items div:hover {
-  background-color: #e9e9e9; 
-}
+  .brand span {
+    display: block;
+    margin-top: 1px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .2em;
+  }
 
-/*when navigating through the items using the arrow keys:*/
-.autocomplete-active {
-  background-color: DodgerBlue !important; 
-  color: #ffffff; 
-}
+  .header-note {
+    color: #d9e8f6;
+    font-size: 14px;
+  }
+
+  main {
+    width: min(100% - 40px, 1120px);
+    margin: 48px auto 80px;
+  }
+
+  .search-panel {
+    position: relative;
+    overflow: visible;
+    padding: clamp(28px, 6vw, 58px);
+    border-radius: 4px;
+    background: linear-gradient(118deg, #07376b 0%, #0755a4 72%, #0879b8 100%);
+    color: white;
+    box-shadow: 0 12px 30px rgb(14 45 75 / 14%);
+  }
+
+  .eyebrow {
+    margin: 0 0 10px;
+    color: #b9e8ff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .16em;
+  }
+
+  h1 {
+    max-width: 680px;
+    margin: 0;
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.12;
+    letter-spacing: -.025em;
+  }
+
+  .intro {
+    max-width: 620px;
+    margin: 14px 0 28px;
+    color: #e2edf8;
+    font-size: 17px;
+  }
+
+  .domain-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    max-width: 800px;
+    margin-bottom: 20px;
+  }
+
+  .domain-field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .domain-field label {
+    color: #e2edf8;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .domain-field select {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid #d5e0e9;
+    border-radius: 3px;
+    padding: 0 14px;
+    background: white;
+    color: var(--ink);
+    font: inherit;
+  }
+
+  .domain-field select:focus-visible {
+    outline: 3px solid #7ed7ff;
+    outline-offset: 2px;
+  }
+
+  form {
+    display: flex;
+    max-width: 800px;
+    gap: 10px;
+  }
+
+  .autocomplete {
+    position: relative;
+    display: block;
+    flex: 1;
+    min-width: 0;
+  }
+
+  input {
+    min-height: 58px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0 18px;
+    font: inherit;
+  }
+
+  input[type=text] {
+    width: 100%;
+    background: white;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px rgb(8 43 80 / 8%);
+  }
+
+  input[type=text]::placeholder { color: #6a7886; }
+
+  input[type=text]:focus-visible {
+    outline: 3px solid #7ed7ff;
+    outline-offset: 2px;
+  }
+
+  input[type=submit] {
+    min-width: 128px;
+    background: var(--bright-blue);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s ease, transform .15s ease;
+  }
+
+  input[type=submit]:hover {
+    background: #008bc4;
+    transform: translateY(-1px);
+  }
+
+  .search-hint {
+    margin: 12px 0 0;
+    color: #d1e4f4;
+    font-size: 13px;
+  }
+
+  .content-card {
+    margin-top: 26px;
+    padding: 30px clamp(22px, 5vw, 48px);
+    border: 1px solid #e1e7ed;
+    border-radius: 4px;
+    background: var(--surface);
+    box-shadow: 0 4px 16px rgb(14 45 75 / 5%);
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    color: var(--navy);
+    font-size: clamp(21px, 3vw, 28px);
+    line-height: 1.25;
+  }
+
+  .content-card p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .category-list span {
+    padding: 8px 13px;
+    border: 1px solid #d7e4f0;
+    border-radius: 2px;
+    background: #f6f9fc;
+    color: #174b7c;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .autocomplete-items {
+    position: absolute;
+    z-index: 99;
+    top: calc(100% + 5px);
+    right: 0;
+    left: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: white;
+    box-shadow: 0 10px 24px rgb(4 30 55 / 22%);
+    color: var(--ink);
+  }
+
+  .autocomplete-items div {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8edf2;
+    background: white;
+    cursor: pointer;
+  }
+
+  .autocomplete-items div:last-child { border-bottom: 0; }
+  .autocomplete-items div:hover { background: #edf6fc; }
+
+  .autocomplete-active {
+    background: #e2f3fc !important;
+    color: #07376b;
+  }
+
+  @media (max-width: 600px) {
+    .utility-bar { justify-content: center; gap: 16px; padding: 10px 16px; }
+    .brand-row { min-height: 68px; padding: 14px 20px; }
+    .header-note { font-size: 12px; text-align: right; }
+    main { width: min(100% - 24px, 1120px); margin-top: 24px; }
+    .search-panel { padding: 28px 20px; }
+    .domain-controls { grid-template-columns: 1fr; gap: 12px; }
+    form { flex-direction: column; }
+    input[type=submit] { width: 100%; }
+    .content-card { margin-top: 16px; }
+  }
 </style>
 </head>     
 <body>
-
-<h2>Autocomplete</h2>
-
-<p>Start typing:</p>
-
-<!--Make sure the form has the autocomplete function switched off:-->
-<form autocomplete="off" action="/action_page.php">
-  <div class="autocomplete" style="width:300px;">
-    <input id="myInput" type="text" name="mySearchBox" placeholder="Start typing...">
+<div class="utility-bar" aria-label="Utility navigation">
+  <a href="#products">Products</a>
+  <a href="#training">Training</a>
+  <a href="#services">Services</a>
+  <a href="#support">Support</a>
+  <a href="#account">My Account</a>
+</div>
+<header class="brand-header">
+  <div class="brand-row">
+    <a class="brand" href="#top" aria-label="Aviation Parts home">AVIATION<span>DISTRIBUTION</span></a>
+    <div class="header-note">Anything you need for every flight</div>
   </div>
-  <input type="submit">
-</form>
+</header>
+
+<main id="top">
+  <section class="search-panel" aria-labelledby="page-title">
+    <p class="eyebrow" id="searchEyebrow"></p>
+    <h1 id="page-title">Find what you need to fly.</h1>
+    <p class="intro">Search by part number, brand, category, or anything else to explore aviation parts, training, services, and a lot more.</p>
+
+    <div class="domain-controls">
+      <div class="domain-field">
+        <label for="applicationDomain">Application</label>
+        <select id="applicationDomain" name="applicationDomain"></select>
+      </div>
+      <div class="domain-field">
+        <label for="dataDomain">Data Access</label>
+        <select id="dataDomain" name="dataDomain"></select>
+      </div>
+    </div>
+
+    <!--Make sure the form has the autocomplete function switched off:-->
+    <form autocomplete="off" action="/action_page.php">
+      <div class="autocomplete">
+        <input id="myInput" type="text" name="mySearchBox" placeholder="Enter a part number, category, brand or other search term" aria-label="Search aviation parts">
+      </div>
+      <input type="submit" value="Search">
+    </form>
+    <p class="search-hint">Try a part number such as 32090-6, or search a category.</p>
+  </section>
+
+  <section class="content-card" id="products" aria-labelledby="categories-title">
+    <h2 id="categories-title">Shop everything you need to fly.</h2>
+    <p>Explore popular parts categories or start typing in the search bar above.</p>
+    <div class="category-list" aria-label="Popular categories">
+      <span>Flight Controls</span>
+      <span>Hardware and Hoses</span>
+      <span>Hydraulic Fittings</span>
+      <span>Flight Compartment</span>
+    </div>
+  </section>
+</main>
 
 <script>
-function autocomplete(inp, arr) {
+function autocomplete(inp, getData) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
   /*execute a function when someone writes in the text field:*/
   inp.addEventListener("input", function(e) {
       var a, b, i, val = this.value;
+      var arr = getData();
       /*close any already open lists of autocompleted values*/
       closeAllLists();
       if (!val) { return false;}
@@ -179,10 +442,101 @@ function autocomplete(inp, arr) {
   });
 }
 
-/*An array containing a small example of parts brand names:*/
-var partsBrands = ["Safe Flight Instruments","Flight Structures Inc","American Safety Flight Systems","Horizon Aerospace LLC","Flightline Electronics Inc"]
-/*initiate the autocomplete function on the "myInput" element, and pass along the partsBrands array as possible autocomplete values:*/
-autocomplete(document.getElementById("myInput"), partsBrands);
+/*Configuration values*/
+var ApplicationDomain = Object.freeze({
+  SHOP_PARTS: "shop-parts",
+  SHOP_TRAINING: "shop-training",
+  SERVICES: "services",
+  SUPPORT: "support",
+  BOEING_SITE: "www-boeing"
+});
+var applicationDomains = Object.values(ApplicationDomain);
+var defaultApplicationDomain = ApplicationDomain.SHOP_PARTS;
+var DataDomain = Object.freeze({
+  ALL: "All",
+  PARTS_ONLY: "Parts Only",
+  PARTS_AND_TRAINING: "Parts + Training",
+  PARTS_AND_SERVICES: "Parts + Services",
+  SERVICES_ONLY: "Services Only",
+  SUPPORT_ONLY: "Support Only",
+  TRAINING_ONLY: "Training Only"
+});
+var dataDomains = Object.values(DataDomain);
+var defaultDataDomain = DataDomain.PARTS_ONLY;
+
+function populateDomainSelect(select, options, selectedValue) {
+  options.forEach(function(option) {
+    var item = document.createElement("option");
+    item.value = option;
+    item.textContent = option;
+    item.selected = option === selectedValue;
+    select.appendChild(item);
+  });
+}
+
+var applicationDomainSelect = document.getElementById("applicationDomain");
+var dataDomainSelect = document.getElementById("dataDomain");
+var searchEyebrow = document.getElementById("searchEyebrow");
+populateDomainSelect(applicationDomainSelect, applicationDomains, defaultApplicationDomain);
+populateDomainSelect(dataDomainSelect, dataDomains, defaultDataDomain);
+searchEyebrow.textContent = dataDomainSelect.value + " search";
+
+applicationDomainSelect.addEventListener("change", function(event) {
+  // TODO: Add application-domain change handling.
+});
+
+dataDomainSelect.addEventListener("change", function(event) {
+  searchEyebrow.textContent = dataDomainSelect.value + " Search";
+  document.getElementById("myInput").dispatchEvent(new Event("input", { bubbles: true }));
+});
+
+/*Arrays containing small examples of lists of values:*/
+var dropListPartsBrands = ["Safe Flight Instruments","Flight Structures Inc","American Safety Flight Systems","Horizon Aerospace LLC","Flightline Electronics Inc"]
+var dropListPartsCategories = ["Flight Compartment","Flight Controls","Hardware and Hoses","Hoses, Ducts, Fittings, and Clamps","Hydraulic Hoses-Fittings"]
+var dropListPartsNumbers = ["FLIGHT-JACKET-61243-16X16IN","FLIGHT-LUXE-4560-BLUE-BLANKET","FLIGHTCREWL0G=68","04407-2=3F","110413-10","32090-6","32091-7"]
+var dropListTrainingProductNumbers = ["1244-1","1298-1","1298-2","2965-1","2968-1","3016-1","3061-1"]
+var dropListTrainingCategories = ["Computer Based Training","Currency","Flight Training Courses","Flight Training Differences","Instructor Training","Specialty Courses","Training Solutions","Type Rating"]
+var dropListServicesMainAreas = ["About Us","Aircraft Maintenance Solutions","Aviation Business Solutions","Cabin, Modifications And Maintenance","Events","Flight Operations And Performance","News","Parts And Distribution","Resources","Training Solutions"]
+var dropListServicesTrainingSolutions = ["Flight Training","Flight School Training","Flight Simulation Solutions","Maintenance Training"]
+var dropListSupportMainAreas = ["Billing and payments","My account","Password and login","Shipping and returns"]
+var dropListSupportSubAreas = ["Add or Remove Credit Card","Logging In & Using Migration Manager","Customize Purchase Order (PO) Numbers","Distribution 2.0 Account Request","Resolve Multiple Boeing OneLogin (B1L) IDs","Manage My Account","Boeing OneLogin (B1L) Frequently Asked Questions (FAQs)","Logging In & Using Migration Manager","About Boeing OneLogin (B1L) Migration Manager","Resolve Multiple Boeing OneLogin (B1L) IDs","Change my password","Register for Site Access","Access the GE Engines Warranty Return Submission form","View and update shipping methods","Enter a Ship-to-Address","Download a Return Materials Authorization (RMA) form","Use Saturday Delivery","Set a Future Ship Date","Service Level Shipping Frequently Asked Questions (FAQ)","Select Advanced Shipping Options","Enter Ultimate Destination Address","Dry Ice Requirements for Henkel LOCTITE© AERO Products","Change a Shipping Date"]
+
+function getDropListPrefixes(dataDomain) {
+  switch (dataDomain) {
+    case DataDomain.ALL:
+      return ["dropList"];
+    case DataDomain.PARTS_ONLY:
+      return ["dropListParts"];
+    case DataDomain.PARTS_AND_TRAINING:
+      return ["dropListParts", "dropListTraining"];
+    case DataDomain.PARTS_AND_SERVICES:
+      return ["dropListParts", "dropListServices"];
+    case DataDomain.SERVICES_ONLY:
+      return ["dropListServices"];
+    case DataDomain.SUPPORT_ONLY:
+      return ["dropListSupport"];
+    case DataDomain.TRAINING_ONLY:
+      return ["dropListTraining"];
+    default:
+      return [];
+  }
+}
+
+function getDropListData(dataDomain) {
+  var prefixes = getDropListPrefixes(dataDomain);
+  return Object.keys(window).reduce(function(results, variableName) {
+    if (prefixes.some(function(prefix) { return variableName.startsWith(prefix); }) &&
+        Array.isArray(window[variableName])) {
+      return results.concat(window[variableName]);
+    }
+    return results;
+  }, []);
+}
+
+/*Initialize autocomplete with values selected by the current Data Access domain.*/
+autocomplete(document.getElementById("myInput"), function() {
+  return getDropListData(dataDomainSelect.value);
+});
 </script>
 
 </body>
